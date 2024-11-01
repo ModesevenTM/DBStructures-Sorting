@@ -115,7 +115,7 @@ void Polyphase::merge()
 	{
 		while (stats.dummyRuns)
 		{
-			while (prevProb[(longerTape + 1) % 2] <= record[(longerTape + 1) % 2]->probProd)
+			while (record[(longerTape + 1) % 2] != nullptr && prevProb[(longerTape + 1) % 2] <= record[(longerTape + 1) % 2]->probProd)
 			{
 				out->putRecord(record[(longerTape + 1) % 2]);
 				prevProb[(longerTape + 1) % 2] = record[(longerTape + 1) % 2]->probProd;
@@ -126,7 +126,12 @@ void Polyphase::merge()
 			stats.dummyRuns--;
 		}
 		if (record[0] == nullptr && record[1] == nullptr)
+		{
 			isEnd = true;
+			delete in[0];
+			delete in[1];
+			delete out;
+		}
 		else {
 			if (record[(longerTape + 1) % 2] == nullptr)
 			{
@@ -144,13 +149,23 @@ void Polyphase::merge()
 				record[(longerTape + 1) % 2] = record[longerTape];
 				in[longerTape] = new InputBuffer(tapes[outTape]);
 				record[longerTape] = in[longerTape]->fetchRecord();
-				outTape = (outTape + 2 - longerTape) % 3;
-				out = new OutputBuffer(tapes[outTape]);
-				prevProb[0] = -1.0f;
-				prevProb[1] = -1.0f;
+				if (record[longerTape] != nullptr && record[(longerTape + 1) % 2] == nullptr)
+				{
+					isEnd = true;
+					delete in[longerTape];
+					delete in[(longerTape + 1) % 2];
+				}
+				else
+				{
+					outTape = (outTape + 2 - longerTape) % 3;
+					out = new OutputBuffer(tapes[outTape]);
+					prevProb[0] = -1.0f;
+					prevProb[1] = -1.0f;
+				}
 			}
-			else {
-				if (record[0]->probProd < prevProb[0])
+			else
+			{
+				if (record[0] != nullptr && record[0]->probProd < prevProb[0])
 				{
 					while (record[1] != nullptr && record[1]->probProd >= prevProb[1])
 					{
@@ -161,7 +176,7 @@ void Polyphase::merge()
 					prevProb[0] = -1.0f;
 					prevProb[1] = -1.0f;
 				}
-				else if (record[1]->probProd < prevProb[1])
+				else if (record[1] != nullptr && record[1]->probProd < prevProb[1])
 				{
 					while (record[0] != nullptr && record[0]->probProd >= prevProb[0])
 					{
@@ -173,13 +188,13 @@ void Polyphase::merge()
 					prevProb[1] = -1.0f;
 				}
 				else {
-					if (record[0]->probProd < record[1]->probProd)
+					if (record[0] != nullptr && (record[1] == nullptr || record[0]->probProd < record[1]->probProd))
 					{
 						out->putRecord(record[0]);
 						prevProb[0] = record[0]->probProd;
 						record[0] = in[0]->fetchRecord();
 					}
-					else
+					else if (record[1] != nullptr)
 					{
 						out->putRecord(record[1]);
 						prevProb[1] = record[1]->probProd;
