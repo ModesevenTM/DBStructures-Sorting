@@ -3,5 +3,5 @@
 #include <fstream>
 #include <iostream>
 
-Record* generateRandom(int n);
+void generateRandom(int n);
 void fileReadTest(Record* records);

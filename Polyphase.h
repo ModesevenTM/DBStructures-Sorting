@@ -15,6 +15,8 @@ public:
 	int outTape = 2;
 	int longerTape = 0;
 
+	Stats stats;
+
 	void distribute();
 	void merge();
 };

@@ -1,9 +1,10 @@
 #include "OutputBuffer.h"
 
-OutputBuffer::OutputBuffer(std::string f, bool print)
+OutputBuffer::OutputBuffer(std::string f, Stats* s, bool print)
 {
 	buffer = new Record[BLOCK_SIZE];
 	filename = f;
+	stats = s;
 	printContents = print;
 	std::ofstream file(filename, std::ios::out | std::ios::trunc);
 	file.close();
@@ -42,7 +43,7 @@ void OutputBuffer::writeBuffer()
 				file.write((char*)&buffer[i].probSum, sizeof(double));
 			}
 			file.close();
-			stats.writes++;
+			stats->writes++;
 		}
 	}
 }

@@ -20,26 +20,8 @@ int main()
 		std::cout << "How many records do you want to generate?\n";
 		int n;
 		std::cin >> n;
-		Record* records = generateRandom(n);
-		for (int i = 0; i < n; i++)
-		{
-			std::cout << "Record " << i + 1 << ":\n";
-			std::cout << "Probability 1: " << records[i].prob1 << "\n";
-			std::cout << "Probability 2: " << records[i].prob2 << "\n";
-			std::cout << "Probability sum: " << records[i].probSum << "\n";
-			std::cout << "Probability product: " << records[i].probProd << "\n";
-		}
-		delete[] records;
-		records = new Record[n];
-		fileReadTest(records);
-		for (int i = 0; i < n; i++)
-		{
-			std::cout << "Record " << i + 1 << ":\n";
-			std::cout << "Probability 1: " << records[i].prob1 << "\n";
-			std::cout << "Probability 2: " << records[i].prob2 << "\n";
-			std::cout << "Probability sum: " << records[i].probSum << "\n";
-			std::cout << "Probability product: " << records[i].probProd << "\n";
-		}
+		generateRandom(n);
+		Polyphase polyphase;
 	}
 	else if (choice == 2)
 	{

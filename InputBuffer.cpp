@@ -1,9 +1,10 @@
 #include "InputBuffer.h"
 
-InputBuffer::InputBuffer(std::string f)
+InputBuffer::InputBuffer(std::string f, Stats* s)
 {
 	buffer = new Record[BLOCK_SIZE];
 	filename = f;
+	stats = s;
 }
 
 InputBuffer::~InputBuffer()
@@ -32,7 +33,7 @@ Record* InputBuffer::fetchRecord()
 		}
 		file.seekg(lastRead * 3 * sizeof(double), std::ios::beg);
 
-		stats.reads++;
+		stats->reads++;
 
 		while (file.peek() != EOF && recordAmount < BLOCK_SIZE)
 		{

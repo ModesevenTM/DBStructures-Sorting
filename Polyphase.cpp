@@ -34,9 +34,9 @@ Polyphase::~Polyphase()
 void Polyphase::distribute()
 {
 	std::string tapes[] = { "t1.tap", "t2.tap", "t3.tap" };
-	InputBuffer* in = new InputBuffer(tapes[outTape]);
-	OutputBuffer* out1 = new OutputBuffer(tapes[(outTape + 1) % 3], false);
-	OutputBuffer* out2 = new OutputBuffer(tapes[(outTape + 2) % 3], false);
+	InputBuffer* in = new InputBuffer(tapes[outTape], &stats);
+	OutputBuffer* out1 = new OutputBuffer(tapes[(outTape + 1) % 3], &stats, false);
+	OutputBuffer* out2 = new OutputBuffer(tapes[(outTape + 2) % 3], &stats, false);
 	OutputBuffer* outTapes[] = {out1, out2};
 	double prevOnTape[] = { -1.0f, 2.0f }; // TODO: ugly workaround
 	int tapeIdx = 0;
@@ -100,9 +100,9 @@ void Polyphase::distribute()
 void Polyphase::merge()
 {
 	std::string tapes[] = { "t1.tap", "t2.tap", "t3.tap" };
-	OutputBuffer* out = new OutputBuffer(tapes[outTape]);
-	InputBuffer* in1 = new InputBuffer(tapes[(outTape + 1) % 3]);
-	InputBuffer* in2 = new InputBuffer(tapes[(outTape + 2) % 3]);
+	OutputBuffer* out = new OutputBuffer(tapes[outTape], &stats);
+	InputBuffer* in1 = new InputBuffer(tapes[(outTape + 1) % 3], &stats);
+	InputBuffer* in2 = new InputBuffer(tapes[(outTape + 2) % 3], &stats);
 	InputBuffer* in[2] = { in1, in2 };
 
 	double prevProb[] = { -1.0f, -1.0f };
@@ -150,11 +150,9 @@ void Polyphase::merge()
 				
 				delete in[(longerTape + 1) % 2];
 				delete out;
-				phase++;
-				std::cout << "\nAfter phase " << phase << ":\n";
 				in[(longerTape + 1) % 2] = in[longerTape];
 				record[(longerTape + 1) % 2] = record[longerTape];
-				in[longerTape] = new InputBuffer(tapes[outTape]);
+				in[longerTape] = new InputBuffer(tapes[outTape], &stats);
 				record[longerTape] = in[longerTape]->fetchRecord();
 				if (record[longerTape] != nullptr && record[(longerTape + 1) % 2] == nullptr)
 				{
@@ -166,7 +164,9 @@ void Polyphase::merge()
 				{
 					isPhaseEnd = false;
 					outTape = (outTape + 2 - longerTape) % 3;
-					out = new OutputBuffer(tapes[outTape]);
+					out = new OutputBuffer(tapes[outTape], &stats);
+					phase++;
+					std::cout << "\nAfter phase " << phase << ":\n";
 					std::cout << "Longer tape: " << in[longerTape]->filename << "\n";
 					std::cout << "Shorter tape: " << in[(longerTape + 1) % 2]->filename << "\n";
 					std::cout << "Output tape: " << out->filename << "\n";
@@ -219,4 +219,10 @@ void Polyphase::merge()
 			}
 		}
 	}
+
+	std::cout << "Statistics:\n";
+	std::cout << "Number of reads: " << stats.reads << "\n";
+	std::cout << "Number of writes: " << stats.writes << "\n";
+	std::cout << "Number of phases: " << phase << "\n";
+
 }

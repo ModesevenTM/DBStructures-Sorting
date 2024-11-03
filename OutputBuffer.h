@@ -9,11 +9,12 @@ class OutputBuffer
 public:
 	std::string filename;
 	Record* buffer;
+	Stats* stats;
 	int recordAmount = 0;
 	int lastWritten = 0;
 	bool printContents = true;
 
-	OutputBuffer(std::string f, bool print = true);
+	OutputBuffer(std::string f, Stats* s, bool print = true);
 	~OutputBuffer();
 
 	void putRecord(Record* record);

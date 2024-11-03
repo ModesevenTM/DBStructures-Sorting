@@ -1,18 +1,17 @@
 #include "functions.h"
 
-Record* generateRandom(int n)
+void generateRandom(int n)
 {
-	Record* records = new Record[n];
+	Record record;
 	std::ofstream file("t3.tap", std::ios::out | std::ios::binary | std::ios::trunc);
 	for (int i = 0; i < n; i++)
 	{
-		records[i].randomize();
-		file.write((char*)&records[i].prob1, sizeof(double));
-		file.write((char*)&records[i].prob2, sizeof(double));
-		file.write((char*)&records[i].probSum, sizeof(double));
+		record.randomize();
+		file.write((char*)&record.prob1, sizeof(double));
+		file.write((char*)&record.prob2, sizeof(double));
+		file.write((char*)&record.probSum, sizeof(double));
 	}
 	file.close();
-	return records;
 }
 
 void fileReadTest(Record* records)
