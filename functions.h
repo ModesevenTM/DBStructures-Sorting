@@ -4,4 +4,4 @@
 #include <iostream>
 
 void generateRandom(int n);
-void fileReadTest(Record* records);
+void createRecords(int n);
