@@ -29,42 +29,6 @@ int main()
 		int n;
 		std::cin >> n;
 		createRecords(n);
-		/*Record* records = new Record[n];
-		for (int i = 0; i < n; i++)
-		{
-			double p1 = 1, p2 = 1, pS;
-			std::cout << "Enter probabilities so that their sum is between 0 and 1.\n";
-			while (true)
-			{
-				std::cout << "Enter probability 1: ";
-				std::cin >> p1;
-				if (p1 < 0 || p1 > 1)
-					std::cout << "Invalid value. Try again.\n";
-				else break;
-			}
-
-			while (true)
-			{
-				std::cout << "Enter probability 2: ";
-				std::cin >> p2;
-				if (p2 < 0 || p2 > 1)
-					std::cout << "Invalid value. Try again.\n";
-				else break;
-			}
-			
-			while (true)
-			{
-				std::cout << "Enter probability sum: ";
-				std::cin >> pS;
-				if (pS <= p1 + p2 && pS >= std::max(p1, p2))
-				{
-					records[i] = Record(p1, p2, pS);
-					break;
-				}
-				else
-					std::cout << "Invalid value. Try again.\n";
-			}
-		}*/
 	}
 	else if (choice == 3)
 	{
