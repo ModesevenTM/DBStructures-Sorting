@@ -2,7 +2,7 @@
 
 InputBuffer::InputBuffer(std::string f, Stats* s)
 {
-	buffer = new Record[BLOCK_SIZE];
+	buffer = new Record[BLOCK_SIZE / RECORD_SIZE];
 	filename = f;
 	stats = s;
 }
@@ -35,7 +35,7 @@ Record* InputBuffer::fetchRecord()
 
 		stats->reads++;
 
-		while (file.peek() != EOF && recordAmount < BLOCK_SIZE)
+		while (file.peek() != EOF && recordAmount < BLOCK_SIZE / RECORD_SIZE)
 		{
 			file.read((char*)&buffer[recordAmount].prob1, sizeof(double));
 			file.read((char*)&buffer[recordAmount].prob2, sizeof(double));

@@ -1,6 +1,7 @@
 #pragma once
 
-#define BLOCK_SIZE 10 // should be amount of bytes in a block, not the amount of records
+#define RECORD_SIZE 3 * sizeof(double)  // size of a record in bytes
+#define BLOCK_SIZE	1024				// size of a block in bytes
 
 struct Stats {
 	int reads = 0;

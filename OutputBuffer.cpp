@@ -2,7 +2,7 @@
 
 OutputBuffer::OutputBuffer(std::string f, Stats* s, bool print)
 {
-	buffer = new Record[BLOCK_SIZE];
+	buffer = new Record[BLOCK_SIZE / RECORD_SIZE];
 	filename = f;
 	stats = s;
 	printContents = print;
@@ -18,7 +18,7 @@ OutputBuffer::~OutputBuffer()
 
 void OutputBuffer::putRecord(Record* record)
 {
-	if (recordAmount == BLOCK_SIZE)
+	if (recordAmount == BLOCK_SIZE / RECORD_SIZE)
 	{
 		writeBuffer();
 		recordAmount = 0;
