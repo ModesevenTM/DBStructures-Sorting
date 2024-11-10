@@ -14,6 +14,7 @@ public:
 
 	int outTape = 2;
 	int longerTape = 0;
+	bool printContent = false;
 
 	Stats stats;
 
