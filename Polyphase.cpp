@@ -47,8 +47,7 @@ void Polyphase::distribute()
 	int tapeIdx = 0;
 	int seriesBefore = 1, seriesAfter = 1;
 
-	if (printContent)
-		std::cout << "Before distribution:\n";
+	std::cout << "Before distribution:\n";
 
 	// Fibonacci distribution
 	int i = 1, fib = 1, prev = 1;
