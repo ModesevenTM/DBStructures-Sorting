@@ -45,6 +45,7 @@ void Polyphase::distribute()
 	OutputBuffer* outTapes[] = {out1, out2};
 	double prevOnTape[] = { -1.0f, 2.0f }; // TODO: ugly workaround
 	int tapeIdx = 0;
+	int seriesBefore = 1, seriesAfter = 1;
 
 	if (printContent)
 		std::cout << "Before distribution:\n";
@@ -81,6 +82,8 @@ void Polyphase::distribute()
 				if (prevOnTape[tapeIdx] > record->probProd)
 				{
 					isNewSeries = true;
+					seriesBefore++;
+					seriesAfter++;
 					if (j == prev)
 						tapeIdx = (tapeIdx + 1) % 2;
 				}
@@ -88,13 +91,19 @@ void Polyphase::distribute()
 				record->print();
 				outTapes[tapeIdx]->putRecord(record);
 				if (isNewSeries && prevOnTape[tapeIdx] <= record->probProd)
+				{
 					isCoalescence = true;
+					seriesAfter--;
+				}
 				prevOnTape[tapeIdx] = record->probProd;
 				if (isNewSeries) break;
 			}
 		}
 		i++;
 	}
+
+	std::cout << "\nSeries before distribution: " << seriesBefore << "\n";
+	std::cout << "Series after distribution: " << seriesAfter << "\n";
 
 	delete in;
 	delete out1;
