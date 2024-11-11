@@ -21,7 +21,6 @@ int main()
 		int n;
 		std::cin >> n;
 		generateRandom(n);
-		Polyphase polyphase;
 	}
 	else if (choice == 2)
 	{
@@ -30,9 +29,9 @@ int main()
 		std::cin >> n;
 		createRecords(n);
 	}
-	else if (choice == 3)
-	{
+
+	if (choice >= 1 && choice <= 3)
 		Polyphase polyphase;
-	}
+
     return 0;
 }
