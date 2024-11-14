@@ -1,5 +1,7 @@
 ﻿#include <iostream>
 #include <ctime>
+#include <string>
+#include <filesystem>
 
 #include "Record.h"
 #include "functions.h"
@@ -12,7 +14,7 @@
 int main()
 {
 	srand(time(NULL));
-	std::cout << "Choose an option:\n1. Generate records\n2. Create record with given values\n3. Read directly from file (t3.tap)\n";
+	std::cout << "Choose an option:\n1. Generate records\n2. Create record with given values\n3. Read directly from file\n";
 	int choice;
 	std::cin >> choice;
 	if (choice == 1)
@@ -29,7 +31,14 @@ int main()
 		std::cin >> n;
 		createRecords(n);
 	}
-
+	else if (choice == 3)
+	{
+		std::string filename;
+		std::cout << "Enter filename: ";
+		std::cin.ignore();
+		std::getline(std::cin, filename);
+		std::filesystem::copy_file(filename, "t3.tap", std::filesystem::copy_options::overwrite_existing);
+	}
 	if (choice >= 1 && choice <= 3)
 		Polyphase polyphase;
 

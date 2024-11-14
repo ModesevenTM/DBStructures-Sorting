@@ -75,7 +75,10 @@ void Polyphase::distribute()
 				{
 					isEnd = true;
 					if (!j)
+					{
+						tapeIdx = (tapeIdx + 1) % 2; // since we ended up on a "shorter" tape
 						lastSeriesCoalescence = true;
+					}
 					break;
 				}
 				if (prevOnTape[tapeIdx] > record->probProd)
