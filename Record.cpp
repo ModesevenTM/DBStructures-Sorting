@@ -17,14 +17,6 @@ Record::Record(double p1, double p2, double pS)
 	probProd = p1 + p2 - pS;
 }
 
-Record::Record(double p1, double p2, double pS, double pP)
-{
-	prob1 = p1;
-	prob2 = p2;
-	probSum = pS;
-	probProd = pP;
-}
-
 void Record::randomize()
 {
 	prob1 = (double)rand() / RAND_MAX;

@@ -10,7 +10,6 @@ public:
 
 	Record();
 	Record(double p1, double p2, double pS);
-	Record(double p1, double p2, double pS, double pP);
 
 	void randomize();
 	void print();
