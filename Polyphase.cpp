@@ -12,30 +12,6 @@ Polyphase::Polyphase()
 	merge();
 }
 
-Polyphase::~Polyphase()
-{
-}
-
-
-// TODO: Some thoughts on the distribution and merging:
-// - We distribute series on alternating tapes, according to the Fibonacci sequence.
-// - If the first fetched number of the series is higher than the last number present on the tape,
-//   we append this series to the last one on the tape. That way we need to fetch one additional series
-//   since, well, Fibonacci sequence.
-// - Alternately, the tape must include the amount of series corresponding to subsequent Fibonacci numbers,
-//   e.g 1 on the first tape, 1 on the second, 1+1=2 on first, 1+2=3 on second, 2+3=5 on first, etc.
-// - If, in the end, the amount of series on the tape is lower than the Fibonacci number, we need to prepend
-//	 dummy series to the tape, stored in stats.dummyRuns global variable. There's no need to write these
-//   phisically to the tape after distibution, but we need to keep track of them.
-// - After the distribution, we need to merge the tapes. We start by fetching the first records from each tape.
-// - We compare the values and write the one with the lower probability product to the output tape, then fetch
-//	 another record from the same tape. We're doing this until we reach the end of the series, which happens
-//	 when the fetched value is lower than the previous one from the same tape. Then we need to put the rest of
-//	 the values from the other tape to the output tape, so the same thing happens with that series too.
-//	 We repeat this process until we reach the end of any tape. Then the ended tape is open for writing and
-//	 the one previously open for writing is now open for reading. We repeat the process until we empty both the
-//   input tapes - the output tape should be sorted.
-
 void Polyphase::distribute()
 {
 	std::string tapes[] = { "t1.tap", "t2.tap", "t3.tap" };
@@ -43,7 +19,6 @@ void Polyphase::distribute()
 	OutputBuffer* out1 = new OutputBuffer(tapes[(outTape + 1) % 3], &stats, false);
 	OutputBuffer* out2 = new OutputBuffer(tapes[(outTape + 2) % 3], &stats, false);
 	OutputBuffer* outTapes[] = {out1, out2};
-	//double prevOnTape[] = { -1.0f, 2.0f }; // TODO: ugly workaround
 	Record prevRecord[] = { Record(-1.0f), Record(2.0f) };
 	int tapeIdx = 0;
 	int seriesBefore = 1, seriesAfter = 1;

@@ -12,7 +12,6 @@ class Polyphase
 private:
 public:
 	Polyphase();
-	~Polyphase();
 
 	int outTape = 2;
 	int longerTape = 0;
