@@ -5,9 +5,11 @@
 #include "functions.h"
 #include "InputBuffer.h"
 #include "OutputBuffer.h"
+#include "RecordInfo.h"
 
 class Polyphase
 {
+private:
 public:
 	Polyphase();
 	~Polyphase();

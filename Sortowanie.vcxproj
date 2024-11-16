@@ -134,6 +134,7 @@
     <ClCompile Include="Polyphase.cpp" />
     <ClCompile Include="Record.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="RecordInfo.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="commons.h" />
@@ -142,6 +143,7 @@
     <ClInclude Include="OutputBuffer.h" />
     <ClInclude Include="Polyphase.h" />
     <ClInclude Include="Record.h" />
+    <ClInclude Include="RecordInfo.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

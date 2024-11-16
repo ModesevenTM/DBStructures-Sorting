@@ -43,7 +43,8 @@ void Polyphase::distribute()
 	OutputBuffer* out1 = new OutputBuffer(tapes[(outTape + 1) % 3], &stats, false);
 	OutputBuffer* out2 = new OutputBuffer(tapes[(outTape + 2) % 3], &stats, false);
 	OutputBuffer* outTapes[] = {out1, out2};
-	double prevOnTape[] = { -1.0f, 2.0f }; // TODO: ugly workaround
+	//double prevOnTape[] = { -1.0f, 2.0f }; // TODO: ugly workaround
+	Record prevRecord[] = { Record(-1.0f), Record(2.0f) };
 	int tapeIdx = 0;
 	int seriesBefore = 1, seriesAfter = 1;
 
@@ -81,7 +82,7 @@ void Polyphase::distribute()
 					}
 					break;
 				}
-				if (prevOnTape[tapeIdx] > record->probProd)
+				if (prevRecord[tapeIdx] > *record)
 				{
 					isNewSeries = true;
 					seriesBefore++;
@@ -92,12 +93,12 @@ void Polyphase::distribute()
 				std::cout << "Tape " << tapeIdx + 1 << " -> ";
 				record->print();
 				outTapes[tapeIdx]->putRecord(record);
-				if (isNewSeries && prevOnTape[tapeIdx] <= record->probProd)
+				if (isNewSeries && prevRecord[tapeIdx] <= *record)
 				{
 					isCoalescence = true;
 					seriesAfter--;
 				}
-				prevOnTape[tapeIdx] = record->probProd;
+				prevRecord[tapeIdx] = *record;
 				if (isNewSeries) break;
 			}
 		}
@@ -118,19 +119,16 @@ void Polyphase::merge()
 {
 	std::string tapes[] = { "t1.tap", "t2.tap", "t3.tap" };
 	OutputBuffer* out = new OutputBuffer(tapes[outTape], &stats, printContent);
-	InputBuffer* in1 = new InputBuffer(tapes[(outTape + 1) % 3], &stats);
-	InputBuffer* in2 = new InputBuffer(tapes[(outTape + 2) % 3], &stats);
-	InputBuffer* in[2] = { in1, in2 };
+	InputBuffer* in[2] = { new InputBuffer(tapes[(outTape + 1) % 3], &stats), new InputBuffer(tapes[(outTape + 2) % 3], &stats) };
+	RecordInfo record[2] = { {in[0], out, Record(-1.0f), in[0]->fetchRecord()}, {in[1], out, Record(-1.0f), in[1]->fetchRecord()}};
 
-	double prevProb[] = { -1.0f, -1.0f };
-	Record* record[] = { in1->fetchRecord(), in2->fetchRecord() };
 	bool isEnd = false, isPhaseEnd = false;
 	int phase = 1;
 	if (printContent)
 	{
 		std::cout << "\nAfter phase " << phase << ":\n";
-		std::cout << "Longer tape: " << in[longerTape]->filename << "\n";
-		std::cout << "Shorter tape: " << in[(longerTape + 1) % 2]->filename << "\n";
+		std::cout << "Longer tape: " << record[longerTape].in->filename << "\n";
+		std::cout << "Shorter tape: " << record[(longerTape + 1) % 2].in->filename << "\n";
 		std::cout << "Output tape: " << out->filename << "\n";
 	}
 
@@ -138,117 +136,80 @@ void Polyphase::merge()
 	{
 		while (stats.dummyRuns)
 		{
-			while (record[(longerTape + 1) % 2] != nullptr && prevProb[(longerTape + 1) % 2] <= record[(longerTape + 1) % 2]->probProd)
-			{
-				out->putRecord(record[(longerTape + 1) % 2]);
-				prevProb[(longerTape + 1) % 2] = record[(longerTape + 1) % 2]->probProd;
-				record[(longerTape + 1) % 2] = in[(longerTape + 1) % 2]->fetchRecord();
-			}
-			prevProb[0] = -1.0f;
-			prevProb[1] = -1.0f;
+			record[(longerTape + 1) % 2].putRest();
+			record[0].reset();
+			record[1].reset();
 			stats.dummyRuns--;
 		}
-		if (record[0] == nullptr && record[1] == nullptr)
+		if (record[0].now == nullptr && record[1].now == nullptr)
 		{
 			isEnd = true;
-			delete in[0];
-			delete in[1];
+			delete record[0].in;
+			delete record[1].in;
 			delete out;
 		}
 		else {
-			if (record[(longerTape + 1) % 2] == nullptr)
+			if (record[(longerTape + 1) % 2].now == nullptr)
 			{
 				if (!isPhaseEnd)
-				{
-					while (record[longerTape] != nullptr && prevProb[longerTape] <= record[longerTape]->probProd)
-					{
-						out->putRecord(record[longerTape]);
-						prevProb[longerTape] = record[longerTape]->probProd;
-						record[longerTape] = in[longerTape]->fetchRecord();
-					}
-				}
+					record[longerTape].putRest();
 				
-				delete in[(longerTape + 1) % 2];
-				delete out;
-				in[(longerTape + 1) % 2] = in[longerTape];
-				record[(longerTape + 1) % 2] = record[longerTape];
-				in[longerTape] = new InputBuffer(tapes[outTape], &stats);
-				record[longerTape] = in[longerTape]->fetchRecord();
-				if (record[longerTape] != nullptr && record[(longerTape + 1) % 2] == nullptr)
+				delete record[(longerTape + 1) % 2].in;
+				delete record[(longerTape + 1) % 2].out;
+				record[(longerTape + 1) % 2].in = record[longerTape].in;
+				record[(longerTape + 1) % 2].now = record[longerTape].now;
+				record[longerTape].in = new InputBuffer(tapes[outTape], &stats);
+				record[longerTape].fetchRecord();
+
+				if (record[longerTape].now && record[(longerTape + 1) % 2].now == nullptr)
 				{
 					isEnd = true;
-					delete in[longerTape];
-					delete in[(longerTape + 1) % 2];
+					delete record[longerTape].in;
+					delete record[(longerTape + 1) % 2].in;
 				}
 				else
 				{
 					isPhaseEnd = false;
 					outTape = (outTape + 2 - longerTape) % 3;
 					out = new OutputBuffer(tapes[outTape], &stats, printContent);
+					record[longerTape].out = out;
+					record[(longerTape + 1) % 2].out = out;
 					phase++;
 					if (printContent)
 					{
 						std::cout << "\nAfter phase " << phase << ":\n";
-						std::cout << "Longer tape: " << in[longerTape]->filename << "\n";
-						std::cout << "Shorter tape: " << in[(longerTape + 1) % 2]->filename << "\n";
+						std::cout << "Longer tape: " << record[longerTape].in->filename << "\n";
+						std::cout << "Shorter tape: " << record[(longerTape + 1) % 2].in->filename << "\n";
 						std::cout << "Output tape: " << out->filename << "\n";
 					}
-					prevProb[0] = -1.0f;
-					prevProb[1] = -1.0f;
+					record[0].reset();
+					record[1].reset();
 				}
 			}
 			else
 			{
-				if (record[0] == nullptr || record[0]->probProd < prevProb[0])
+				if (record[0].seriesEnd())
 				{
-					while (record[1] != nullptr && record[1]->probProd >= prevProb[1])
-					{
-						out->putRecord(record[1]);
-						prevProb[1] = record[1]->probProd;
-						record[1] = in[1]->fetchRecord();
-					}
-					prevProb[0] = -1.0f;
-					prevProb[1] = -1.0f;
-					if (record[1] == nullptr && (longerTape + 1) % 2 == 1)
+					record[1].putRest();
+					record[0].reset();
+					record[1].reset();
+					if (record[1].now == nullptr && (longerTape + 1) % 2 == 1)
 						isPhaseEnd = true;
 				}
-				else if (record[1] == nullptr || record[1]->probProd < prevProb[1])
+				else if (record[1].seriesEnd())
 				{
-					while (record[0] != nullptr && record[0]->probProd >= prevProb[0])
-					{
-						out->putRecord(record[0]);
-						prevProb[0] = record[0]->probProd;
-						record[0] = in[0]->fetchRecord();
-					}
-					prevProb[0] = -1.0f;
-					prevProb[1] = -1.0f;
-					if (record[0] == nullptr && (longerTape + 1) % 2 == 0)
+					record[0].putRest();
+					record[0].reset();
+					record[1].reset();
+					if (record[0].now == nullptr && (longerTape + 1) % 2 == 0)
 						isPhaseEnd = true;
 				}
-				else {
-					if (record[0]->probProd < record[1]->probProd)
-					{
-						out->putRecord(record[0]);
-						prevProb[0] = record[0]->probProd;
-						record[0] = in[0]->fetchRecord();
-					}
-					else
-					{
-						out->putRecord(record[1]);
-						prevProb[1] = record[1]->probProd;
-						record[1] = in[1]->fetchRecord();
-					}
-				}
+				else record[*record[1].now < *record[0].now].putRecord();
 			}
 		}
 	}
 
-	std::cout << "\nStatistics:\n";
-	std::cout << "Number of reads: " << stats.reads << "\n";
-	std::cout << "Number of writes: " << stats.writes << "\n";
-	std::cout << "Number of phases: " << phase << "\n";
-
-	InputBuffer finalIn(tapes[outTape], &stats);
+	InputBuffer finalIn(tapes[outTape], nullptr);
 	std::cout << "\nAfter merging:\n";
 	Record* finalRecord = finalIn.fetchRecord();
 	while (finalRecord != nullptr)
@@ -256,5 +217,10 @@ void Polyphase::merge()
 		finalRecord->print();
 		finalRecord = finalIn.fetchRecord();
 	}
+
+	std::cout << "\nStatistics:\n";
+	std::cout << "Number of reads: " << stats.reads << "\n";
+	std::cout << "Number of writes: " << stats.writes << "\n";
+	std::cout << "Number of phases: " << phase << "\n";
 
 }
