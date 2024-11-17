@@ -133,18 +133,17 @@ void Polyphase::merge()
 				delete record[(longerTape + 1) % 2].out;
 				record[(longerTape + 1) % 2].in = record[longerTape].in;
 				record[(longerTape + 1) % 2].now = record[longerTape].now;
-				record[longerTape].in = new InputBuffer(tapes[outTape], &stats);
-				record[longerTape].fetchRecord();
 
-				if (record[longerTape].now && record[(longerTape + 1) % 2].now == nullptr)
+				if (record[(longerTape + 1) % 2].now == nullptr)
 				{
 					isEnd = true;
-					delete record[longerTape].in;
 					delete record[(longerTape + 1) % 2].in;
 				}
 				else
 				{
 					isPhaseEnd = false;
+					record[longerTape].in = new InputBuffer(tapes[outTape], &stats);
+					record[longerTape].fetchRecord();
 					outTape = (outTape + 2 - longerTape) % 3;
 					out = new OutputBuffer(tapes[outTape], &stats, printContent);
 					record[longerTape].out = out;
