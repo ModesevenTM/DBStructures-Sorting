@@ -33,7 +33,7 @@ Record* InputBuffer::fetchRecord()
 		}
 		file.seekg(lastRead * 3 * sizeof(double), std::ios::beg);
 
-		stats->reads++;
+		if(stats) stats->reads++;
 
 		while (file.peek() != EOF && recordAmount < BLOCK_SIZE / RECORD_SIZE)
 		{

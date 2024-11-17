@@ -6,8 +6,5 @@ const int BLOCK_SIZE = 960;					// size of a block in bytes
 struct Stats {
 	int reads = 0;
 	int writes = 0;
-	int sortings = 0;
-	int phases = 0;
 	int dummyRuns = 0;
-	int tapeWithDummies = -1;
 };
